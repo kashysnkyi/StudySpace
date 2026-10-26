@@ -1,0 +1,23 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Помилка";
+}
+
+<h1 class="text-danger">Помилка.</h1>
+<h2 class="text-danger">Під час обробки запиту сталася помилка.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Ідентифікатор запиту:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<h3>Режим розробки</h3>
+<p>
+    У середовищі <strong>Development</strong> відображається докладніша інформація про помилку.
+</p>
+<p>
+    <strong>Середовище Development не слід вмикати для опублікованих застосунків.</strong>
+    Воно може відкрити користувачам чутливу інформацію про помилки.
+</p>

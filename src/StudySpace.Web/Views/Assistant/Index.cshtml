@@ -1,0 +1,10 @@
+@model Workspace
+@{
+    ViewData["Title"] = "Асистент простору";
+}
+<div class="page-heading"><div><span class="eyebrow">ПРЕМІУМ · SSE АСИСТЕНТ</span><h1 class="display-5 fw-semibold mt-2">Запитайте про «@Model.Name»</h1><p class="text-secondary mb-0">Асистент шукає документи простору, показує виконані кроки й передає відповідь поступово.</p></div></div>
+<div class="row g-4">
+    <div class="col-lg-8"><div class="panel-card"><div id="assistantMessages" class="assistant-messages" aria-live="polite"><div class="assistant-message">Запитайте про плани, нотатки або рішення, збережені в цьому просторі.</div></div><form id="assistantForm" data-workspace-id="@Model.Id" class="d-flex gap-2 mt-4"><input id="assistantPrompt" class="form-control" required minlength="3" placeholder="Над чим ми працюємо?" /><button class="btn btn-primary" type="submit">Запитати</button></form></div></div>
+    <div class="col-lg-4"><div class="panel-card"><h2 class="h5">Хід роботи асистента</h2><ol id="assistantSteps" class="text-secondary mb-0"><li>Очікування запитання</li></ol></div></div>
+</div>
+@section Scripts { <script src="~/js/assistant.js" asp-append-version="true"></script> }

@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Мапа просторів";
+    ViewData["Description"] = "Переглядайте робочі простори StudySpace на інтерактивній мапі OpenStreetMap.";
+}
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhkh9Y07f1JjMZ1jtKEI1uN7W0Q=" crossorigin="" />
+}
+<div class="page-heading">
+    <div><span class="eyebrow">ІНТЕГРАЦІЯ OPENSTREETMAP</span><h1 class="display-5 fw-semibold mt-2">Мапа робочих просторів</h1><p class="text-secondary mb-0">Усі простори з координатами завантажуються з API та фільтруються без перезавантаження сторінки.</p></div>
+    <select id="mapPlan" class="form-select w-auto" aria-label="Фільтр за тарифом"><option value="">Усі тарифи</option><option>Free</option><option>Premium</option></select>
+</div>
+<div class="panel-card p-2"><div id="workspaceMap" style="height: 560px; border-radius: 18px" aria-label="Інтерактивна мапа робочих просторів"></div></div>
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="~/js/workspace-map.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,48 @@
+@model Workspace
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">РОБОЧИЙ ПРОСТІР · ТАРИФ @Model.Plan.GetDisplayName()</span>
+        <h1 class="display-5 fw-semibold mt-2 mb-2">@Model.Name</h1>
+        <p class="text-secondary mb-0">@Model.Description</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" asp-controller="Documents" asp-action="Create" asp-route-workspaceId="@Model.Id">Новий документ</a>
+        @if (Model.Plan == SubscriptionPlan.Premium)
+        {
+            <a class="btn btn-outline-primary" asp-controller="Board" asp-action="Index" asp-route-workspaceId="@Model.Id">Відкрити спільну дошку</a>
+            <a class="btn btn-outline-primary" asp-controller="Assistant" asp-action="Index" asp-route-workspaceId="@Model.Id">Запитати асистента</a>
+        }
+        <a class="btn btn-outline-dark" asp-action="Edit" asp-route-id="@Model.Id">Редагувати</a>
+        <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Видалити</a>
+    </div>
+</div>
+
+@if (Model.Documents.Count == 0)
+{
+    <div class="empty-state">
+        <h2 class="h4">Цей простір готовий до першої ідеї.</h2>
+        <p class="text-secondary">Створіть документ для нотаток, плану або рішення.</p>
+        <a class="btn btn-primary" asp-controller="Documents" asp-action="Create" asp-route-workspaceId="@Model.Id">Створити документ</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var document in Model.Documents)
+        {
+            <div class="col-md-6 col-xl-4">
+                <a class="document-card" asp-controller="Documents" asp-action="Details" asp-route-id="@document.Id">
+                    <span class="status-badge">@document.Status.GetDisplayName()</span>
+                    <h2 class="h5 mt-4">@document.Title</h2>
+                    <p>@document.Summary</p>
+                    <small>Оновлено @document.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy")</small>
+                </a>
+            </div>
+        }
+    </div>
+}
+

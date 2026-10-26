@@ -1,0 +1,53 @@
+@model Document
+@{
+    ViewData["Title"] = $"Редагування: {Model.Title}";
+    ViewData["Description"] = "Спільне редагування документа StudySpace у реальному часі.";
+}
+
+<div class="editor-shell" data-document-id="@Model.Id">
+    <div class="editor-header">
+        <div>
+            <a class="text-decoration-none" asp-action="Details" asp-route-id="@Model.Id">← Повернутися до документа</a>
+            <h1 class="h2 mt-2 mb-1">@Model.Title</h1>
+            <span id="connectionStatus" class="connection-status">Підключення…</span>
+        </div>
+        <div class="block-toolbar" aria-label="Додати блок вмісту">
+            <button type="button" class="btn btn-outline-dark btn-sm" data-add-block="1">Заголовок</button>
+            <button type="button" class="btn btn-outline-dark btn-sm" data-add-block="0">Абзац</button>
+            <button type="button" class="btn btn-outline-dark btn-sm" data-add-block="2">Список</button>
+            <button type="button" class="btn btn-outline-dark btn-sm" data-add-block="3">Код</button>
+            <button type="button" class="btn btn-outline-dark btn-sm" data-add-block="4">Цитата</button>
+        </div>
+    </div>
+
+    <div id="collaboratorNotice" class="collaborator-notice" hidden></div>
+    <div id="editorBlocks" class="editor-blocks">
+        @foreach (var block in Model.Blocks)
+        {
+            <article class="editor-block" data-block-id="@block.Id" draggable="true">
+                <button class="drag-handle" type="button" aria-label="Перемістити блок">⋮⋮</button>
+                <div class="block-fields">
+                    <select class="form-select form-select-sm block-type" aria-label="Тип блоку">
+                        <option value="0" selected="@(block.Type == BlockType.Paragraph)">Абзац</option>
+                        <option value="1" selected="@(block.Type == BlockType.Heading)">Заголовок</option>
+                        <option value="2" selected="@(block.Type == BlockType.Checklist)">Список</option>
+                        <option value="3" selected="@(block.Type == BlockType.Code)">Код</option>
+                        <option value="4" selected="@(block.Type == BlockType.Quote)">Цитата</option>
+                    </select>
+                    <textarea class="form-control block-content" rows="3" aria-label="Вміст блоку">@block.Content</textarea>
+                    <span class="save-state" aria-live="polite">Збережено</span>
+                </div>
+                <button class="delete-block" type="button" aria-label="Видалити блок">×</button>
+            </article>
+        }
+    </div>
+    <div id="emptyEditor" class="empty-state" hidden>
+        <p class="mb-0">Оберіть тип блоку вище, щоб почати роботу.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@10.0.11/dist/browser/signalr.min.js"></script>
+    <script src="~/js/block-editor.js" asp-append-version="true"></script>
+}
+

@@ -1,0 +1,67 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Огляд";
+}
+
+<section class="hero-panel mb-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-7">
+            <span class="eyebrow">ВАШ ЦЕНТР НАВЧАЛЬНОЇ РОБОТИ</span>
+            <h1 class="display-3 fw-semibold mt-3">Нотатки, файли та командна робота в одному місці.</h1>
+            <p class="lead text-secondary mt-4 mb-4">Створюйте структуровані документи, додавайте матеріали проєкту та працюйте разом у реальному часі.</p>
+            <div class="d-flex flex-wrap gap-3">
+                <a class="btn btn-primary btn-lg px-4" asp-controller="Workspaces" asp-action="Index">Переглянути простори <span aria-hidden="true">→</span></a>
+                <a class="btn btn-outline-dark btn-lg px-4" asp-controller="Files" asp-action="Index">Завантажити файл</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="preview-card">
+                <div class="preview-topline"><span class="live-dot"></span><span class="preview-kicker">АКТИВНИЙ ПРОСТІР</span><span>Преміум</span></div>
+                <h2 class="h4 mt-3">Веб-технології</h2>
+                <p class="preview-copy">Усе необхідне для роботи з матеріалами вже підключено.</p>
+                <div class="preview-line mt-4"><span class="check-dot"></span><span>REST API і Swagger</span><strong>Готово</strong></div>
+                <div class="preview-line"><span class="check-dot"></span><span>Співпраця в реальному часі</span><strong>Активно</strong></div>
+                <div class="preview-line"><span class="check-dot"></span><span>Файли та матеріали</span><strong>@Model.AttachmentCount</strong></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="row g-3">
+        <div class="col-6 col-xl-3"><div class="metric-card"><span>Простори<small>Активні простори</small></span><strong>@Model.WorkspaceCount</strong></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card"><span>Документи<small>Знання команди</small></span><strong>@Model.DocumentCount</strong></div></div>
+        <div class="col-6 col-xl-3"><div class="metric-card"><span>Опубліковано<small>Готово до поширення</small></span><strong>@Model.PublishedCount</strong></div></div>
+        <div class="col-6 col-xl-3"><a class="metric-card metric-link" asp-controller="Files" asp-action="Index"><span>Файли<small>Відкрити бібліотеку →</small></span><strong>@Model.AttachmentCount</strong></a></div>
+    </div>
+</section>
+
+<section class="feature-ribbon mb-5" aria-label="Можливості StudySpace">
+    <div><span>↗</span><strong>Реальний час</strong><small>Співпраця через SignalR</small></div>
+    <div><span>⌕</span><strong>Пошук</strong><small>Повнотекстовий Lucene</small></div>
+    <div><span>⌁</span><strong>Інтеграції</strong><small>REST, MCP і SSE</small></div>
+    <div><span>✓</span><strong>Перевірено</strong><small>25 автоматичних перевірок</small></div>
+</section>
+
+<section>
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">ОСТАННЯ РОБОТА</span>
+            <h2 class="h3 mt-2 mb-0">Продовжуйте з того місця, де зупинилися</h2>
+        </div>
+        <a asp-controller="Workspaces" asp-action="Index">Усі простори →</a>
+    </div>
+    <div class="row g-4 mt-2">
+        @foreach (var document in Model.RecentDocuments)
+        {
+            <div class="col-md-6 col-xl-4">
+                <a class="document-card" asp-controller="Documents" asp-action="Details" asp-route-id="@document.Id">
+                    <span class="status-badge">@document.Status.GetDisplayName()</span>
+                    <h3 class="h5 mt-4">@document.Title</h3>
+                    <p>@document.Summary</p>
+                    <small>@document.Workspace?.Name · @document.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy")</small>
+                </a>
+            </div>
+        }
+    </div>
+</section>

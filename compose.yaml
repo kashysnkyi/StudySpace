@@ -1,0 +1,41 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__StudySpace: Data Source=/app/data/studyspace.db
+      RabbitMq__Host: rabbitmq
+    volumes:
+      - studyspace-data:/app/data
+      - studyspace-uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      RabbitMq__Host: rabbitmq
+    depends_on:
+      - rabbitmq
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  studyspace-data:
+  studyspace-uploads:
+  rabbitmq-data:
+

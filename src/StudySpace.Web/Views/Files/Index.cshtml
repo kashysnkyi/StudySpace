@@ -1,0 +1,82 @@
+@model IReadOnlyList<Document>
+@{
+    ViewData["Title"] = "Файли";
+    var attachmentCount = Model.Sum(document => document.Attachments.Count);
+}
+
+<section class="files-hero mb-4">
+    <div>
+        <span class="eyebrow">БІБЛІОТЕКА ФАЙЛІВ</span>
+        <h1 class="display-5 fw-semibold mt-2 mb-2">Усе, чим поділилася команда.</h1>
+        <p class="text-secondary mb-0">Завантажуйте матеріали, зображення, нотатки та PDF до потрібного документа.</p>
+    </div>
+    <div class="files-total" aria-label="Загальна кількість вкладень">
+        <strong>@attachmentCount</strong>
+        <span>файлів збережено</span>
+    </div>
+</section>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <h2 class="h4">Спочатку створіть документ.</h2>
+        <p class="text-secondary">Кожен файл прив'язаний до документа, тому контекст проєкту не губиться.</p>
+        <a class="btn btn-primary" asp-controller="Documents" asp-action="Create">Створити документ</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var document in Model)
+        {
+            var limitMb = document.Workspace?.Plan == SubscriptionPlan.Premium ? 10 : 2;
+            <div class="col-xl-6">
+                <article class="file-vault-card">
+                    <header class="file-vault-header">
+                        <div>
+                            <span class="file-workspace">@document.Workspace?.Name</span>
+                            <h2 class="h4 mb-1"><a asp-controller="Documents" asp-action="Details" asp-route-id="@document.Id">@document.Title</a></h2>
+                            <small class="text-secondary">Вкладень: @document.Attachments.Count · до @limitMb МБ на файл</small>
+                        </div>
+                        <span class="status-badge">@document.Status.GetDisplayName()</span>
+                    </header>
+
+                    <form asp-controller="Documents" asp-action="Upload" asp-route-id="@document.Id" method="post" enctype="multipart/form-data" class="file-drop-form compact-upload mt-3">
+                        <input type="hidden" name="returnUrl" value="/Files" />
+                        <div class="file-drop-zone" data-file-drop-zone>
+                            <input class="visually-hidden" id="file-@document.Id" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md" required />
+                            <label class="file-picker" for="file-@document.Id">
+                                <span class="upload-icon">↑</span>
+                                <span><strong>Перетягніть файл сюди</strong><small>або натисніть для вибору · PDF, зображення, текст, Markdown</small></span>
+                            </label>
+                            <div class="file-preview" data-file-preview hidden></div>
+                        </div>
+                        <button class="btn btn-primary w-100 upload-submit" type="submit" disabled>Завантажити до «@document.Title»</button>
+                    </form>
+
+                    @if (document.Attachments.Count > 0)
+                    {
+                        <div class="attachment-list mt-3">
+                            @foreach (var attachment in document.Attachments)
+                            {
+                                <div class="attachment-row">
+                                    <a href="@attachment.StorageUrl" target="_blank" rel="noopener">
+                                        <span class="attachment-icon">@System.IO.Path.GetExtension(attachment.FileName).TrimStart('.').ToUpperInvariant()</span>
+                                        <span><strong>@attachment.FileName</strong><small>@(Math.Max(1, attachment.SizeBytes / 1024)) KB</small></span>
+                                    </a>
+                                    <form asp-controller="Documents" asp-action="DeleteAttachment" asp-route-id="@document.Id" method="post">
+                                        <input type="hidden" name="attachmentId" value="@attachment.Id" />
+                                        <input type="hidden" name="returnUrl" value="/Files" />
+                                        <button class="btn btn-sm btn-link text-danger" type="submit" aria-label="Видалити @attachment.FileName">Видалити</button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                </article>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts { <script src="~/js/file-preview.js" asp-append-version="true"></script> }

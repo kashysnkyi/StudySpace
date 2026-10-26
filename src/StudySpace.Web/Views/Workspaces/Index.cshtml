@@ -1,0 +1,39 @@
+@model IReadOnlyList<Workspace>
+@{
+    ViewData["Title"] = "Простори";
+}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">ПРОСТОРИ ДЛЯ ЗНАНЬ</span>
+        <h1 class="display-5 fw-semibold mt-2 mb-1">Робочі простори</h1>
+        <p class="text-secondary mb-0">Зберігайте документи й матеріали проєкту за командою або предметом.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">Створити простір</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <h2 class="h4">Створіть перший робочий простір</h2>
+        <p class="text-secondary">Почніть з навчального курсу, команди або власної теми дослідження.</p>
+        <a class="btn btn-primary" asp-action="Create">Почати</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var workspace in Model)
+        {
+            <div class="col-md-6 col-xl-4">
+                <a class="document-card" asp-action="Details" asp-route-id="@workspace.Id">
+                    <span class="eyebrow">ПРОСТІР · @workspace.Plan.GetDisplayName()</span>
+                    <h2 class="h4 mt-3">@workspace.Name</h2>
+                    <p>@workspace.Description</p>
+                    <small>Документів: @workspace.Documents.Count</small>
+                </a>
+            </div>
+        }
+    </div>
+}
+

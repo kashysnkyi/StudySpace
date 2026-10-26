@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY src/StudySpace.Worker/StudySpace.Worker.csproj src/StudySpace.Worker/
+RUN dotnet restore src/StudySpace.Worker/StudySpace.Worker.csproj
+COPY src/StudySpace.Worker/ src/StudySpace.Worker/
+RUN dotnet publish src/StudySpace.Worker/StudySpace.Worker.csproj -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "StudySpace.Worker.dll"]

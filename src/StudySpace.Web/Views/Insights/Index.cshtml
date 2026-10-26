@@ -1,0 +1,55 @@
+@model InsightsViewModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Аналітика";
+    ViewData["Description"] = "Візуальний огляд документів та активності у StudySpace.";
+    var chartLabels = JsonSerializer.Serialize(Model.DocumentsByStatus.Keys);
+    var chartValues = JsonSerializer.Serialize(Model.DocumentsByStatus.Values);
+}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">СТАН РОБОЧОГО ПРОСТОРУ</span>
+        <h1 class="display-5 fw-semibold mt-2 mb-1">Аналітика</h1>
+        <p class="text-secondary mb-0">Короткий огляд знань, які зібрала ваша команда.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="metric-card"><span>Простори</span><strong>@Model.WorkspaceCount</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="metric-card"><span>Документи</span><strong>@Model.DocumentCount</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="metric-card"><span>Блоки</span><strong>@Model.BlockCount</strong></div></div>
+    <div class="col-6 col-lg-3"><div class="metric-card"><span>Файли</span><strong>@Model.AttachmentCount</strong></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="panel-card">
+            <h2 class="h5 mb-4">Документи за статусом</h2>
+            <div class="chart-wrap"><canvas id="statusChart" aria-label="Документи, згруповані за статусом"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="panel-card h-100">
+            <h2 class="h5">Що показують ці дані</h2>
+            <p class="text-secondary">Розподіл показує, скільки матеріалів ще в чернетках, готові до поширення або заархівовані. Дані завантажуються з поточної бази даних.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <script>
+        const labels = @Html.Raw(chartLabels);
+        const values = @Html.Raw(chartValues);
+        const canvas = document.getElementById('statusChart');
+        if (window.Chart && canvas) {
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data: values, backgroundColor: ['#2b6e4f', '#d3a53b', '#9aa49d'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+    </script>
+}
+

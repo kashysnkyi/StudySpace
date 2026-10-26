@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore StudySpace.slnx
+
+      - name: Verify formatting
+        run: dotnet format StudySpace.slnx --no-restore --verify-no-changes
+
+      - name: Build
+        run: dotnet build StudySpace.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test StudySpace.slnx --configuration Release --no-build --logger "trx;LogFileName=tests.trx"
+
+      - name: Publish test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+
+  container:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build container
+        run: docker build --tag studyspace:${{ github.sha }} .
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: src/studyspace-spa/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: src/studyspace-spa
+      - run: pnpm build
+        working-directory: src/studyspace-spa
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: tests/e2e/pnpm-lock.yaml
+      - run: dotnet restore StudySpace.slnx
+      - run: dotnet build StudySpace.slnx --no-restore
+      - run: pnpm install --frozen-lockfile
+        working-directory: tests/e2e
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: tests/e2e
+      - run: pnpm test
+        working-directory: tests/e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: tests/e2e/playwright-report
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: [build-and-test, container, frontend, e2e]
+    environment: production
+    env:
+      AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet publish src/StudySpace.Web/StudySpace.Web.csproj -c Release -o publish
+      - name: Deploy to Azure Web App
+        if: env.AZURE_WEBAPP_PUBLISH_PROFILE != '' && vars.AZURE_WEBAPP_NAME != ''
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publish
+

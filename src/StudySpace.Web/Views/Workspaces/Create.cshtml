@@ -1,0 +1,12 @@
+@model Workspace
+@{
+    ViewData["Title"] = "Новий простір";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="mb-4"><span class="eyebrow">НОВИЙ ПРОСТІР</span><h1 class="h2 mt-2">Створіть зручне місце для цієї роботи.</h1></div>
+        <form asp-action="Create" class="panel-card">@await Html.PartialAsync("_Form", Model)</form>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+

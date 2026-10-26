@@ -1,0 +1,35 @@
+@model Workspace
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="mb-3">
+    <label asp-for="Name" class="form-label fw-semibold"></label>
+    <input asp-for="Name" class="form-control" placeholder="Наприклад, Веб-технології" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+<div class="mb-4">
+    <label asp-for="Description" class="form-label fw-semibold"></label>
+    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Що ваша команда зберігатиме тут?"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-sm-6">
+        <label asp-for="Latitude" class="form-label fw-semibold"></label>
+        <input asp-for="Latitude" class="form-control" placeholder="50.4501" />
+        <span asp-validation-for="Latitude" class="text-danger"></span>
+    </div>
+    <div class="col-sm-6">
+        <label asp-for="Longitude" class="form-label fw-semibold"></label>
+        <input asp-for="Longitude" class="form-control" placeholder="30.5234" />
+        <span asp-validation-for="Longitude" class="text-danger"></span>
+    </div>
+    <div class="form-text">Необов'язкові координати розміщують простір на спільній мапі.</div>
+</div>
+<div class="mb-4">
+    <label asp-for="Plan" class="form-label fw-semibold"></label>
+    <select asp-for="Plan" asp-items="Html.GetEnumSelectList<SubscriptionPlan>()" class="form-select"></select>
+    <div class="form-text">Преміум відкриває спільну дошку, асистента та розширену аналітику.</div>
+</div>
+<div class="d-flex gap-2">
+    <button class="btn btn-primary" type="submit">Зберегти простір</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Скасувати</a>
+</div>
+

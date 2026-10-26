@@ -1,0 +1,51 @@
+# Build output
+bin/
+obj/
+
+# Local application data
+*.db
+*.db-shm
+*.db-wal
+src/StudySpace.Web/wwwroot/uploads/*
+!src/StudySpace.Web/wwwroot/uploads/.gitkeep
+
+# IDE and OS files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Front-end dependencies and secrets
+node_modules/
+/src/studyspace-spa/dist/
+*.tsbuildinfo
+/src/studyspace-spa/vite.config.js
+/src/studyspace-spa/vite.config.d.ts
+.env
+.env.*
+!.env.example
+
+# Test output
+TestResults/
+coverage/
+playwright-report/
+test-results/
+
+# Local cloud emulator and Functions settings
+local.settings.json
+
+# Temporary local work
+tmp/
+output/
+report/StudySpace_Overleaf_Report.zip
+
+# LaTeX intermediate files
+report/WebTechnologiesLab/main.aux
+report/WebTechnologiesLab/main.log
+report/WebTechnologiesLab/main.out
+report/WebTechnologiesLab/main.toc
+report/WebTechnologiesLab/main.pdf
+

@@ -1,0 +1,29 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Вхід";
+}
+<div class="row justify-content-center"><div class="col-md-7 col-lg-5">
+    <div class="panel-card">
+        <span class="eyebrow">ОБЛІКОВИЙ ЗАПИС</span>
+        <h1 class="h2 mt-2">Вхід до StudySpace</h1>
+        <p class="text-secondary">Якщо налаштовані облікові дані Google, використовується OAuth. У режимі розробки доступні ізольовані тестові профілі.</p>
+        @if (Model.GoogleEnabled)
+        {
+            <form asp-action="GoogleLogin" method="post" class="mb-4"><button class="btn btn-primary w-100" type="submit">Продовжити з Google</button></form>
+        }
+        @if (Context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
+        {
+            <hr />
+            <form asp-action="DevelopmentLogin" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label asp-for="DisplayName" class="form-label"></label>
+                <input asp-for="DisplayName" class="form-control mb-3" />
+                <label asp-for="Subject" class="form-label"></label>
+                <input asp-for="Subject" class="form-control mb-3" />
+                <button class="btn btn-outline-dark w-100" type="submit">Увійти з тестовим профілем</button>
+            </form>
+        }
+    </div>
+</div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+

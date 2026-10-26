@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "З'єднання";
+    ViewData["Description"] = "Порівняння polling, long polling і WebSocket у реальному часі.";
+}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">ЛАБОРАТОРІЯ З'ЄДНАНЬ</span>
+        <h1 class="display-5 fw-semibold mt-2 mb-1">Три способи оновлювати сторінку.</h1>
+        <p class="text-secondary mb-0">Кожен клієнт спостерігає однаковий серверний сигнал і фіксує власну мережеву поведінку.</p>
+    </div>
+</div>
+
+<div class="row g-4" id="connectivityLab">
+    @foreach (var transport in new[] { ("polling", "Частий polling", "Запит надсилається кожні дві секунди, навіть без змін."), ("long-poll", "Long polling", "Запит очікує на нові дані, а потім одразу запускається наступний."), ("websocket", "WebSocket", "Одне двостороннє з'єднання отримує зміни в момент їх появи.") })
+    {
+        <div class="col-lg-4">
+            <section class="transport-card" data-transport="@transport.Item1">
+                <div class="transport-indicator"></div>
+                <h2 class="h4">@transport.Item2</h2>
+                <p class="text-secondary">@transport.Item3</p>
+                <div class="pulse-value"><span>Активні редактори</span><strong data-value>0</strong></div>
+                <dl class="transport-metrics">
+                    <div><dt>Запити</dt><dd data-requests>0</dd></div>
+                    <div><dt>Повідомлення</dt><dd data-messages>0</dd></div>
+                    <div><dt>Сер. затримка</dt><dd><span data-latency>0</span> мс</dd></div>
+                </dl>
+                <small data-status>Запуск…</small>
+            </section>
+        </div>
+    }
+</div>
+
+<div class="panel-card mt-4">
+    <h2 class="h5">Порівняння</h2>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Транспорт</th><th>Трафік без змін</th><th>Затримка</th><th>Складність сервера</th></tr></thead>
+            <tbody>
+                <tr><td>Частий polling</td><td>Високий</td><td>До інтервалу polling</td><td>Низька</td></tr>
+                <tr><td>Long polling</td><td>Середній</td><td>Низька</td><td>Середня</td></tr>
+                <tr><td>WebSocket</td><td>Дуже низький</td><td>Найнижча</td><td>Вищі витрати на життєвий цикл з'єднання</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts { <script src="~/js/connectivity-lab.js" asp-append-version="true"></script> }
+

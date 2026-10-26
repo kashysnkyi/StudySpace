@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="@(ViewData["Description"] ?? "Спільний простір для навчання, планування та роботи зі знаннями.")" />
+    <meta property="og:title" content="@ViewData["Title"] · StudySpace" />
+    <meta property="og:description" content="@(ViewData["Description"] ?? "Створюйте, впорядковуйте та діліться знаннями з командою.")" />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.PathBase}{Context.Request.Path}")" />
+    <title>@ViewData["Title"] · StudySpace</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/StudySpace.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark py-3">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <span class="brand-mark">S</span>
+                    <span>StudySpace</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Відкрити навігацію">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="mainNavigation" class="navbar-collapse collapse justify-content-between">
+                    <ul class="navbar-nav ms-lg-4">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Огляд</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Workspaces" asp-action="Index">Простори</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Files" asp-action="Index">Файли</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Insights" asp-action="Index">Аналітика</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Connectivity" asp-action="Index">З'єднання</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Board" asp-action="Index">Дошка</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Map" asp-action="Index">Мапа</a></li>
+                    </ul>
+                    <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                        <div class="global-search" data-search-endpoint="/api/search/documents">
+                            <label class="visually-hidden" for="globalSearch">Пошук документів</label>
+                            <input id="globalSearch" class="form-control form-control-sm" type="search" placeholder="Пошук документів…" autocomplete="off" aria-autocomplete="list" aria-controls="searchResults" />
+                            <div id="searchResults" class="search-results" role="listbox" hidden></div>
+                        </div>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <span class="small text-white-50 text-nowrap">@User.Identity.Name</span>
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <button class="btn btn-outline-light btn-sm" type="submit">Вийти</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-light btn-sm" asp-controller="Account" asp-action="Login">Увійти</a>
+                        }
+                        <a class="btn btn-light btn-sm px-3 text-nowrap" asp-controller="Workspaces" asp-action="Create">Новий простір</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container py-4 py-lg-5">
+        @if (TempData["Message"] is string message)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрити"></button>
+            </div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @error
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрити"></button>
+            </div>
+        }
+        <main role="main" class="pb-5">@RenderBody()</main>
+    </div>
+    <footer class="border-top py-4 text-muted">
+        <div class="container d-flex flex-wrap justify-content-between gap-2">
+            <span>&copy; 2026 StudySpace</span>
+            <span>Створено для злагодженої командної роботи.</span>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

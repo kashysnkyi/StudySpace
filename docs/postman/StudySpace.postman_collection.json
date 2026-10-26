@@ -1,0 +1,71 @@
+{
+  "info": {
+    "_postman_id": "89165d77-6882-4bc8-a2f3-fe10b66df635",
+    "name": "StudySpace API",
+    "description": "Requests for demonstrating C5, B1, and QA1.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:5187" },
+    { "key": "workspaceId", "value": "e08c2747-1c44-4fde-920f-7f3598e852cf" },
+    { "key": "documentId", "value": "5ded85a3-035d-46af-934e-5c1c204a4ec7" }
+  ],
+  "item": [
+    {
+      "name": "List documents",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/documents?skip=0&limit=10"
+      }
+    },
+    {
+      "name": "Get document",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/documents/{{documentId}}"
+      }
+    },
+    {
+      "name": "Create document",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Created', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('documentId', pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\",\n  \"title\": \"API demonstration\",\n  \"summary\": \"Created from Postman\",\n  \"status\": 0\n}"
+        },
+        "url": "{{baseUrl}}/api/documents"
+      }
+    },
+    {
+      "name": "Update document",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\",\n  \"title\": \"API demonstration updated\",\n  \"summary\": \"Updated from Postman\",\n  \"status\": 1\n}"
+        },
+        "url": "{{baseUrl}}/api/documents/{{documentId}}"
+      }
+    },
+    {
+      "name": "Delete document",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/documents/{{documentId}}"
+      }
+    }
+  ]
+}

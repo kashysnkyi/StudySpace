@@ -1,0 +1,114 @@
+@model Document
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="page-heading">
+    <div>
+        <a class="text-decoration-none" asp-controller="Workspaces" asp-action="Details" asp-route-id="@Model.WorkspaceId">← @Model.Workspace?.Name</a>
+        <h1 class="display-5 fw-semibold mt-3 mb-2">@Model.Title</h1>
+        <p class="text-secondary mb-0">@Model.Summary</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-action="EditContent" asp-route-id="@Model.Id">Відкрити редактор</a>
+        <a class="btn btn-outline-dark" asp-action="Edit" asp-route-id="@Model.Id">Редагувати</a>
+        <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Видалити</a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl))
+{
+    <img class="cover-image mb-4" src="@Model.CoverImageUrl" alt="Обкладинка документа @Model.Title" />
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <article class="panel-card">
+            @if (Model.Blocks.Count == 0)
+            {
+                <div class="empty-state"><p class="mb-0">Тут буде доступний редактор блоків документа.</p></div>
+            }
+            @foreach (var block in Model.Blocks)
+            {
+                <div class="content-block">
+                    @switch (block.Type)
+                    {
+                        case BlockType.Heading:
+                            <h2 class="h3">@block.Content</h2>
+                            break;
+                        case BlockType.Checklist:
+                            <ul class="mb-0">
+                                @foreach (var item in block.Content.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <li>✓ @item</li>
+                                }
+                            </ul>
+                            break;
+                        case BlockType.Code:
+                            <pre class="bg-dark text-light rounded p-3 mb-0"><code>@block.Content</code></pre>
+                            break;
+                        case BlockType.Quote:
+                            <blockquote class="border-start border-3 ps-3 mb-0">@block.Content</blockquote>
+                            break;
+                        default:
+                            <p class="mb-0">@block.Content</p>
+                            break;
+                    }
+                </div>
+            }
+        </article>
+    </div>
+    <aside class="col-lg-4">
+        <div class="panel-card mb-4">
+            <span class="eyebrow">ВІДОМОСТІ ПРО ДОКУМЕНТ</span>
+            <dl class="row mt-3 mb-0">
+                <dt class="col-5">Статус</dt><dd class="col-7">@Model.Status.GetDisplayName()</dd>
+                <dt class="col-5">Створено</dt><dd class="col-7">@Model.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</dd>
+                <dt class="col-5">Оновлено</dt><dd class="col-7">@Model.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy")</dd>
+            </dl>
+        </div>
+        <div class="panel-card attachment-panel">
+            <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                    <span class="eyebrow">ВКЛАДЕННЯ</span>
+                    <h2 class="h5 mt-2 mb-0">Файли проєкту</h2>
+                </div>
+                <span class="file-count">@Model.Attachments.Count</span>
+            </div>
+            @if (Model.Attachments.Count > 0)
+            {
+                <div class="attachment-list mt-3">
+                    @foreach (var attachment in Model.Attachments)
+                    {
+                        <div class="attachment-row">
+                            <a href="@attachment.StorageUrl" target="_blank" rel="noopener">
+                                <span class="attachment-icon">@System.IO.Path.GetExtension(attachment.FileName).TrimStart('.').ToUpperInvariant()</span>
+                                <span><strong>@attachment.FileName</strong><small>@(Math.Max(1, attachment.SizeBytes / 1024)) KB</small></span>
+                            </a>
+                            <form asp-action="DeleteAttachment" asp-route-id="@Model.Id" method="post">
+                                <input type="hidden" name="attachmentId" value="@attachment.Id" />
+                                <button class="btn btn-sm btn-link text-danger" type="submit" aria-label="Видалити @attachment.FileName">Видалити</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+            <form asp-action="Upload" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="mt-3 file-drop-form">
+                <div class="file-drop-zone" data-file-drop-zone>
+                    <input class="visually-hidden" id="file-@Model.Id" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md" required />
+                    <label class="file-picker" for="file-@Model.Id">
+                        <span class="upload-icon">↑</span>
+                        <span><strong>Перетягніть файл сюди</strong><small>або натисніть для вибору</small></span>
+                    </label>
+                    <div class="file-preview" data-file-preview hidden></div>
+                </div>
+                <button class="btn btn-primary w-100 upload-submit" type="submit" disabled>Завантажити файл</button>
+                <small class="d-block text-secondary mt-2">PDF, зображення, текст або Markdown. До @(Model.Workspace?.Plan == SubscriptionPlan.Premium ? 10 : 2) МБ.</small>
+            </form>
+            <a class="small d-inline-block mt-3" asp-controller="Files" asp-action="Index">Відкрити бібліотеку файлів →</a>
+        </div>
+    </aside>
+</div>
+
+@section Scripts { <script src="~/js/file-preview.js" asp-append-version="true"></script> }
+

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "studyspace": {
+      "command": "dotnet",
+      "args": ["run", "--project", "src/StudySpace.Mcp"],
+      "env": { "STUDYSPACE_API_URL": "http://localhost:5036" }
+    }
+  }
+}

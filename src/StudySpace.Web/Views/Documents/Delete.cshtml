@@ -1,0 +1,14 @@
+@model Document
+@{
+    ViewData["Title"] = "Видалення документа";
+}
+<div class="row justify-content-center"><div class="col-lg-7"><div class="panel-card">
+    <span class="eyebrow">ПІДТВЕРДЖЕННЯ ВИДАЛЕННЯ</span>
+    <h1 class="h2 mt-2">Видалити «@Model.Title»?</h1>
+    <p class="text-secondary">Документ, його блоки та вкладення буде видалено.</p>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+        <button class="btn btn-danger" type="submit">Видалити документ</button>
+        <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.Id">Скасувати</a>
+    </form>
+</div></div></div>
+

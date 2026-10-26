@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Спільна дошка";
+    ViewData["Description"] = "Полотно для спільних ескізів і схем у реальному часі.";
+    var boardId = (string)ViewBag.BoardId;
+}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">СПІЛЬНЕ ПОЛОТНО</span>
+        <h1 class="display-5 fw-semibold mt-2 mb-1">Малюйте ідеї разом.</h1>
+        <p class="text-secondary mb-0"><strong>@ViewBag.WorkspaceName</strong> синхронізує кожен завершений штрих між підключеними браузерами.</p>
+    </div>
+    <span id="boardStatus" class="connection-status">Підключення…</span>
+</div>
+
+<div class="board-shell" data-board-id="@boardId">
+    <div class="board-toolbar">
+        <label>Колір <input id="strokeColor" type="color" value="#2b6e4f" /></label>
+        <label>Товщина <input id="strokeWidth" type="range" min="1" max="20" value="4" /></label>
+        <button id="clearBoard" class="btn btn-outline-danger btn-sm" type="button">Очистити дошку</button>
+        <span class="text-secondary ms-auto">Підтримуються миша, стилус і дотик</span>
+    </div>
+    <canvas id="sharedCanvas" width="1400" height="760" aria-label="Спільна дошка для малювання"></canvas>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@10.0.11/dist/browser/signalr.min.js"></script>
+    <script src="~/js/shared-board.js" asp-append-version="true"></script>
+}
+

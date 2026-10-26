@@ -1,0 +1,10 @@
+@model DocumentFormViewModel
+@{
+    ViewData["Title"] = "Новий документ";
+}
+<div class="row justify-content-center"><div class="col-lg-8">
+    <div class="mb-4"><span class="eyebrow">НОВИЙ ДОКУМЕНТ</span><h1 class="h2 mt-2">Зафіксуйте те, чим варто поділитися.</h1></div>
+    <form asp-action="Create" class="panel-card">@await Html.PartialAsync("_Form", Model)</form>
+</div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+

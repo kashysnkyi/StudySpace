@@ -1,0 +1,629 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T2A]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  \usepackage{fontspec}
+  \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{DejaVu Serif}}
+  \IfFontExistsTF{Arial}{\setsansfont{Arial}}{\setsansfont{DejaVu Sans}}
+  \IfFontExistsTF{Consolas}{\setmonofont{Consolas}}{\setmonofont{DejaVu Sans Mono}}
+\fi
+\usepackage[ukrainian]{babel}
+\usepackage{microtype,geometry,setspace,enumitem,titlesec,booktabs,array,tabularx,longtable}
+\usepackage{xcolor,listings,graphicx,float,fancyhdr,lastpage,hyperref,tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\geometry{left=25mm,right=15mm,top=20mm,bottom=20mm}
+\setstretch{1.15}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.18em}
+\setlist[itemize]{leftmargin=1.8em,itemsep=0.2em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.9em,itemsep=0.2em,topsep=0.25em}
+\setlength{\emergencystretch}{4em}
+\renewcommand{\arraystretch}{1.18}
+\definecolor{primary}{HTML}{163629}
+\definecolor{accent}{HTML}{287857}
+\definecolor{soft}{HTML}{F1F6F0}
+\definecolor{codebg}{HTML}{F6F8FA}
+\definecolor{codegreen}{HTML}{197A45}
+\definecolor{codegray}{HTML}{5F6B7A}
+\hypersetup{colorlinks=true,linkcolor=primary,urlcolor=accent,citecolor=primary,
+  pdftitle={Звіт до лабораторної роботи з Web-технологій},pdfauthor={Кашинський Владислав}}
+\titleformat{\section}{\large\bfseries\color{primary}}{\makebox[2.4em][l]{\thesection.}}{0pt}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{primary}}{\makebox[3.0em][l]{\thesubsection.}}{0pt}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{accent}}{\makebox[4.1em][l]{\thesubsubsection.}}{0pt}{}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Web-технології}
+\fancyhead[R]{\small StudySpace}
+\fancyfoot[C]{\small \thepage\ з \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{15pt}
+\lstdefinestyle{studyspace}{backgroundcolor=\color{codebg},basicstyle=\ttfamily\small,
+  keywordstyle=\color{accent}\bfseries,commentstyle=\color{codegreen},stringstyle=\color{primary},
+  numbers=left,numberstyle=\tiny\color{codegray},numbersep=8pt,frame=single,
+  rulecolor=\color{codegray!30},breaklines=true,showstringspaces=false,tabsize=2}
+\lstset{style=studyspace}
+\newcommand{\code}[1]{\path{#1}}
+\newcommand{\reportfigure}[3]{\begin{figure}[H]\centering
+  \IfFileExists{#1}{\includegraphics[width=#2\textwidth,height=0.70\textheight,keepaspectratio]{#1}}
+  {\fbox{\parbox[c][5cm][c]{0.88\textwidth}{\centering Знімок екрана відсутній.}}}
+  \caption{#3}\end{figure}}
+\newcommand{\taskcard}[5]{\subsubsection{#1: #2 (#3 б.)}
+  \textbf{Мета.} #4
+
+  \textbf{Реалізація і перевірка.} #5}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+{\large Київський національний університет імені Тараса Шевченка}\\[0.5em]
+{\large Факультет інформаційних технологій}\\
+{\large Кафедра програмних систем і технологій}\\[4.6cm]
+{\Large\bfseries ЗВІТ}\\[0.5em]
+{\large до лабораторної роботи}\\[0.25em]
+{\large з дисципліни «Web-технології»}\\[0.9em]
+{\Large\bfseries Розроблення платформи спільної роботи StudySpace}
+\end{center}
+\vfill
+\begin{flushright}\begin{minipage}{0.48\textwidth}
+Виконав:\\ студент групи ТТП-32\\ \textbf{Кашинський Владислав}\\[1.2em]
+\end{minipage}\end{flushright}
+\vfill
+\begin{center}Київ -- 2026\end{center}
+
+\newpage
+\section*{Анотація}
+\addcontentsline{toc}{section}{Анотація}
+У лабораторній роботі спроєктовано та реалізовано StudySpace, навчальну
+web-платформу для організації робочих просторів, документів, файлів і
+спільної роботи. Пов'язані вимоги об'єднано в один Git-монорепозиторій,
+а технологічно незалежні частини оформлено як окремі застосунки. Рішення
+містить ASP.NET Core MVC/API, React SPA, Azure Functions, RabbitMQ Worker,
+MCP-сервер, SQLite, SignalR, SSE, WebSocket, Lucene.NET,
+Leaflet/OpenStreetMap, Chart.js та автоматизовані тести.
+
+Обрано 36 пунктів завдання сумарною вартістю 104 бали. Під час перевірки
+підтверджено форматування і збірку .NET-рішення, 20 модульних та
+інтеграційних тестів, 5 browser E2E-сценаріїв, production-збірку React,
+REST CRUD, пагінацію, кеш, пошук, SSE і MCP. Зовнішні cloud-інтеграції
+залишено вимкненими до додавання особистих облікових даних студента.
+
+\textbf{Ключові слова:} ASP.NET Core, MVC, REST API, React, SignalR,
+WebSocket, SSE, SQLite, Entity Framework Core, RabbitMQ, Azure Functions,
+MCP, Playwright, Docker.
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Постановка задачі}
+\subsection{Мета роботи}
+Мета роботи полягає у проходженні повного циклу створення web-системи: від моделі даних і
+CRUD до REST API, браузерного інтерфейсу, авторизації, realtime-обміну,
+інтеграцій, тестування та підготовки розгортання. Практичний результат має
+працювати локально й бути готовим до подальшої публікації.
+
+\subsection{Предметна область}
+StudySpace зберігає навчальні матеріали у робочих просторах. Простір має
+назву, опис, тариф, координати та учасників. У ньому створюються документи зі
+статусом, summary, обкладинкою, впорядкованими блоками та файлами. Учасники
+мають ролі Owner, Editor або Viewer. Premium відкриває дошку, помічника та
+розширені можливості.
+
+\subsection{Вибір завдань і розрахунок}
+Сума балів за реалізовані завдання становить 104. За формулою з умови
+номінальний результат:
+\[60\cdot\frac{104}{100}=62{,}4.\]
+
+\begin{longtable}{>{\bfseries}p{0.25\textwidth} p{0.57\textwidth} r}
+\toprule Етапи & Практичний результат & Бали \\
+\midrule\endfirsthead
+\toprule Етапи & Практичний результат & Бали \\
+\midrule\endhead
+C1, C5, QA1, B1 & MVC CRUD, файли, REST, Swagger/Postman, пагінація & 10 \\
+C2, C3, C4 & Azure-ready deployment, GitHub Actions, Docker/Compose & 5 \\
+C6, C7, F1, F2, QA2 & Landing, SEO, Chart.js, AJAX, E2E & 13 \\
+C8, B2, C9, B4 & Карта, webhook/Telegram, telemetry, Lucene & 9 \\
+C10, C11 & Polling, long polling, WebSocket, SignalR & 8 \\
+C12, F3, C13, C14 & Block editor, drag-and-drop, realtime, presence & 9 \\
+C15 & File API, DataTransfer, FileReader & 3 \\
+C16, B5, B6, QA3 & OAuth, ролі, multi-tenancy, plans, auth tests & 12 \\
+F5 & Окремий React + TypeScript SPA & 3 \\
+B7 & Окремий Azure Functions API & 3 \\
+C18, F6 & Shared board, Pointer Events, Canvas 2D & 9 \\
+B8, B9, C19 & RabbitMQ, memory cache, Azure Blob/local storage & 10 \\
+C21, C22 & SSE-помічник і MCP tools & 10 \\
+\midrule \multicolumn{2}{r}{\textbf{Разом}} & \textbf{104} \\
+\bottomrule
+\end{longtable}
+
+\section{Поділ рішення на проєкти}
+\subsection{Чому монорепозиторій}
+Усі частини працюють з однією предметною областю, тому їх збережено в одному
+репозиторії. Це дає спільну історію, одну команду збірки й відсутність
+дублювання моделей. Водночас кожен незалежний процес є окремим проєктом.
+Результат: \textbf{один репозиторій}, \textbf{5 запускних застосунків} і
+\textbf{10 технічних проєктів}.
+
+\subsection{Запускні застосунки}
+\begin{table}[H]\centering\small
+\begin{tabularx}{\textwidth}{>{\bfseries}p{0.25\textwidth} p{0.28\textwidth} X}
+\toprule Застосунок & Розташування & Роль \\
+\midrule
+StudySpace Web & \code{src/StudySpace.Web} & MVC, REST, SignalR, SSE, WebSocket, UI \\
+StudySpace SPA & \code{src/studyspace-spa} & React/TypeScript REST-клієнт \\
+StudySpace Functions & \code{src/StudySpace.Functions} & Serverless health і digest \\
+StudySpace Worker & \code{src/StudySpace.Worker} & RabbitMQ consumer \\
+StudySpace MCP & \code{src/StudySpace.Mcp} & Stdio JSON-RPC/MCP tools \\
+\bottomrule
+\end{tabularx}\caption{П'ять окремо запущуваних частин}\end{table}
+
+\subsection{Усі технічні проєкти}
+\begin{longtable}{>{\bfseries}p{0.25\textwidth} p{0.50\textwidth} r}
+\toprule Проєкт & Призначення & Тип \\
+\midrule\endfirsthead
+\toprule Проєкт & Призначення & Тип \\
+\midrule\endhead
+StudySpace.Core & Сутності й enum предметної області & .NET library \\
+StudySpace.Data & DbContext, EF Core, SQLite, migration, seed & .NET library \\
+StudySpace.Web & MVC, API, realtime, UI, integrations & .NET web \\
+StudySpace.Functions & Ізольовані Azure Functions & .NET functions \\
+StudySpace.Worker & RabbitMQ background service & .NET worker \\
+StudySpace.Mcp & MCP stdio server & .NET console \\
+StudySpace.\newline UnitTests & Доменні unit-тести & .NET tests \\
+StudySpace.\newline IntegrationTests & API й authorization tests & .NET tests \\
+studyspace-spa & React, TypeScript, Vite & Node.js \\
+e2e & Playwright Chromium scenarios & Node.js \\
+\bottomrule\end{longtable}
+
+\subsection{Структура каталогів}
+\begin{lstlisting}[language={},caption={Скорочена структура}]
+StudySpace/
+|-- src/
+|   |-- StudySpace.Core/        |-- StudySpace.Data/
+|   |-- StudySpace.Web/         |-- StudySpace.Functions/
+|   |-- StudySpace.Worker/      |-- StudySpace.Mcp/
+|   `-- studyspace-spa/
+|-- tests/
+|   |-- StudySpace.UnitTests/   |-- StudySpace.IntegrationTests/
+|   `-- e2e/
+|-- docs/stages/                |-- report/WebTechnologiesLab/
+|-- .github/workflows/ci.yml    |-- compose.yaml
+`-- StudySpace.slnx
+\end{lstlisting}
+
+\section{Архітектура і модель даних}
+\subsection{Архітектурна схема}
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=9mm and 10mm,
+box/.style={draw=primary,rounded corners,fill=soft,align=center,minimum height=10mm,text width=30mm},
+line/.style={-{Latex[length=2mm]},thick,color=primary}]
+\node[box] (browser) {MVC UI\\Browser};
+\node[box,above=of browser] (spa) {React SPA};
+\node[box,right=of browser] (web) {StudySpace.Web\\MVC + REST + realtime};
+\node[box,below=of web] (data) {Core + Data\\EF Core + SQLite};
+\node[box,right=of web] (queue) {RabbitMQ\\Worker};
+\node[box,below=of queue] (storage) {Azure Blob\\або local files};
+\node[box,above=of queue] (mcp) {MCP Server};
+\node[box,right=of queue] (func) {Azure\\Functions};
+\draw[line] (browser)--(web); \draw[line] (spa)--(web); \draw[line] (web)--(data);
+\draw[line] (web)--(queue); \draw[line] (web)--(storage); \draw[line] (mcp)--(web);
+\draw[line] (func)--(web);
+\end{tikzpicture}\caption{Взаємодія компонентів StudySpace}\end{figure}
+
+Основна точка входу налаштовує dependency injection, EF Core, cookies,
+опційний Google OAuth, Swagger, SignalR, Application Insights і middleware.
+Контролери перед читанням або зміною даних виконують tenant-aware перевірку.
+
+\subsection{Сутності}
+\begin{table}[H]\centering\small
+\begin{tabularx}{\textwidth}{>{\bfseries}p{0.25\textwidth} X}
+\toprule Сутність & Основні поля та зв'язки \\
+\midrule
+Workspace & Id, Name, Description, Plan, coordinates; Documents і Members \\
+Document & WorkspaceId, Title, Summary, CoverImageUrl, Status; Blocks, Attachments \\
+DocumentBlock & DocumentId, Type, Content, Position \\
+Attachment & DocumentId, FileName, ContentType, Size, Url \\
+WorkspaceMember & WorkspaceId, UserId, DisplayName, Role \\
+\bottomrule\end{tabularx}\caption{Модель предметної області}\end{table}
+
+SQLite обрано для запуску без окремого сервера. EF Core створює схему через
+міграції. Seed ідемпотентний: демонстраційні дані додаються лише у порожню БД.
+
+\subsection{Ключові маршрути}
+\begin{table}[H]\centering\small
+\begin{tabularx}{\textwidth}{>{\ttfamily}p{0.34\textwidth} X}
+\toprule Маршрут & Призначення \\
+\midrule
+/ & dashboard \\
+/Workspaces & список і CRUD просторів \\
+/Documents/Details/\{id\} & документ, блоки, файли \\
+/Documents/Editor/\{id\} & realtime editor \\
+/Files & бібліотека вкладень \\
+/Insights & статистика й Chart.js \\
+/Connectivity & три способи оновлення \\
+/Board & Canvas-дошка \\
+/Map & Leaflet/OpenStreetMap \\
+/swagger & REST документація \\
+/api/assistant/stream & SSE-помічник \\
+\bottomrule\end{tabularx}\caption{Ключові маршрути}\end{table}
+
+\section{Послідовність роботи системи}
+Знімки зроблено під час фактичного локального запуску
+\url{http://localhost:5036}; це не макети. Інтерфейс застосунку локалізовано
+українською мовою.
+
+\subsection{Крок 1. Запуск і dashboard}
+Під час запуску застосовуються міграції та seed. Dashboard показує кількість
+просторів, документів, опублікованих матеріалів і файлів.
+\reportfigure{images/01-home.png}{0.96}{Головна сторінка після локального запуску}
+
+\subsection{Крок 2. Робочі простори}
+Список фільтрується за поточним користувачем. Картка містить тариф, опис і
+кількість документів; кнопка створення простору відкриває валідовану MVC-форму.
+\reportfigure{images/02-workspaces.png}{0.96}{Список доступних робочих просторів}
+
+\subsection{Крок 3. Конкретний workspace}
+Власник бачить документи й дозволені дії: створення, налаштування, спільну
+дошку та асистента.
+\reportfigure{images/03-workspace-details.png}{0.96}{Деталі робочого простору}
+
+\subsection{Крок 4. Створення документа}
+Форма приймає назву, короткий опис, URL обкладинки й статус. Сервер перевіряє
+модель, доступ та унікальність, після POST виконує redirect і, за наявності
+налаштувань, telemetry, RabbitMQ та webhook.
+\reportfigure{images/04-create-document.png}{0.96}{MVC-форма створення документа}
+
+\subsection{Крок 5. Деталі документа}
+Сторінка об'єднує відомості, блоки та вкладення. Звідси відкриваються редактор,
+редагування та завантаження файлів.
+\reportfigure{images/05-document-details.png}{0.96}{Документ із контентом і формою вкладень}
+
+\subsection{Крок 6. Блоковий редактор}
+Заголовок, абзац, список, код і цитата зберігаються через REST після короткої
+затримки. Перетягування змінює порядок, SignalR передає зміни та фокус.
+\reportfigure{images/06-block-editor.png}{0.96}{Блоковий realtime-редактор}
+
+\subsection{Крок 7. Файли}
+Зона завантаження читає DataTransfer.files, FileReader будує локальний перегляд, сервер
+перевіряє розширення й тарифний ліміт.
+\reportfigure{images/07-files.png}{0.96}{Бібліотека до завантаження}
+
+\subsection{Крок 8. Аналітика}
+Сторінка аналітики рахує дані з БД; Chart.js будує діаграму статусів.
+\reportfigure{images/09-insights.png}{0.96}{Аналітика з Chart.js}
+
+\subsection{Крок 9. REST API}
+Swagger дозволяє виконати CRUD, пагінацію, кешування та пошук. Інтеграційні тести
+перевіряють HTTP-коди та JSON-контракт.
+\reportfigure{images/10-swagger.png}{0.96}{Swagger/OpenAPI endpoints}
+
+\subsection{Крок 10. Мережеві механізми}
+Один сигнал паралельно читається polling, long polling і WebSocket. Екран
+рахує запити, повідомлення й затримку.
+\reportfigure{images/11-connectivity.png}{0.96}{Порівняння трьох transport}
+
+\subsection{Крок 11. Спільна дошка}
+Canvas 2D реагує на Pointer Events, координати нормалізуються, штрихи та очищення
+синхронізуються SignalR.
+\reportfigure{images/12-board.png}{0.96}{Спільна дошка в режимі realtime}
+
+\subsection{Крок 12. Карта}
+Leaflet завантажує маркери доступних просторів, OpenStreetMap надає карту, а фільтр
+за тарифом повторно запитує API.
+
+\subsection{Крок 13. SSE-помічник}
+Помічник передає етапи пошуку й відповідь частинами через SSE. Без API key працює
+локальний контекстний варіант.
+\reportfigure{images/14-assistant.png}{0.96}{Асистент робочого простору}
+
+\section{Детальний опис 36 завдань}
+\subsection{Common}
+\taskcard{C1}{MVC і модель даних}{3}{Створити пов'язаний CRUD із файлом.}
+{У Core створено п'ять сутностей, у Data створено DbContext, міграції й seed.
+WorkspacesController і DocumentsController реалізують CRUD, AttachmentStorage
+файли, CoverImageUrl містить зовнішнє посилання. Перевірено всі операції та
+повторний запуск без дублювання seed.}
+
+\taskcard{C2}{Azure deployment}{1}{Підготувати cloud-публікацію.}
+{Workflow виконує Release publish і conditional azure/webapps-deploy. Назва
+ресурсу та publish profile винесені у vars/secrets. Release build пройшов;
+живий URL потребує особистої Azure subscription.}
+
+\taskcard{C3}{Continuous integration}{2}{Автоматизувати перевірки змін.}
+{\code{ci.yml} має jobs для restore, format, build, tests, container,
+frontend та E2E. TRX і Playwright report публікуються як artifacts. Ключові
+команди відтворено локально.}
+
+\taskcard{C4}{Контейнеризація}{2}{Описати web, worker і broker.}
+{Multi-stage Dockerfiles створюють Web і Worker images, Compose під'єднує
+RabbitMQ і volumes. Файли перевірено статично та збіркою проєктів; Docker
+Desktop відсутній, тому runtime Compose слід перевірити після інсталяції.}
+
+\taskcard{C5}{REST API}{3}{Надати CRUD документів.}
+{API повертає DTO. POST дає 201+Location, PUT 200, DELETE 204; є 400, 403,
+404 і 409. Lifecycle пройшов integration і ручний smoke test, тимчасовий
+запис видалено.}
+
+\taskcard{C6}{Адаптивний UI}{3}{Створити зрозумілий dashboard.}
+{Bootstrap, responsive grid, cards і forms формують єдину design system.
+Навігація об'єднує модулі. Landing і переходи перевірено Playwright.}
+
+\taskcard{C7}{SEO}{2}{Додати засоби індексації.}
+{Є description, canonical, Open Graph, dynamic robots.txt і sitemap.xml.
+Routes покриті E2E; зовнішній SEO audit можливий після deployment.}
+
+\taskcard{C8}{Карта}{3}{Відобразити геодані й фільтр.}
+{Map/API повертають доступні координати; Leaflet показує OpenStreetMap і
+markers, plan selector фільтрує дані. Marker перевірено E2E і скріншотом.}
+
+\taskcard{C9}{Application Insights}{2}{Підготувати telemetry.}
+{SDK активується лише з connection string; document create/update фіксують
+custom events. Без секрету використовується безпечний no-op; Portal потребує
+власного ресурсу.}
+
+\taskcard{C10}{Polling, long polling, WebSocket}{4}{Практично порівняти transport.}
+{ConnectivityController реалізує state, очікування нової версії та WebSocket.
+Клієнт рахує запити, повідомлення й latency. Локально всі три канали працювали.}
+
+\taskcard{C11}{SignalR}{4}{Додати високорівневу realtime-взаємодію.}
+{CollaborationHub має groups за document/board id і передає blocks, focus,
+strokes та clear. Editor і Board показали Realtime connected.}
+
+\taskcard{C12}{Блоковий редактор}{3}{Створити Notion-подібний контент.}
+{DocumentBlock має type/content/position. API та UI підтримують п'ять типів,
+debounced save і persistence після refresh.}
+
+\taskcard{C13}{Realtime content}{2}{Передавати зміни без reload.}
+{Після API-операції hub транслює create/update/delete/order. Власна подія не
+дублюється, remote update підсвічується. Blocks API і browser flow протестовані.}
+
+\taskcard{C14}{Presence і focus}{2}{Показати блок іншого редактора.}
+{focus/blur передають document id, block id та identity. Group isolation не
+дозволяє подіям перейти в інший документ.}
+
+\taskcard{C15}{File API}{3}{Застосувати File, DataTransfer, FileReader.}
+{Drop читає DataTransfer.files, другий DataTransfer наповнює native input,
+FileReader дає preview. Сервер незалежно перевіряє size/extension. Реальний
+text upload пройшов.}
+
+\taskcard{C16}{OAuth 2.0}{3}{Додати зовнішній sign-in.}
+{Google handler реєструється лише з ClientId/Secret, callback:
+\code{/signin-google}. Для автономного показу є development cookie switcher.
+Реальний consent потребує Google credentials і HTTPS callback.}
+
+\taskcard{C18}{Realtime shared board}{4}{Створити спільне малювання.}
+{BoardStateService тримає bounded history, SignalR передає draw/clear, новий
+клієнт отримує snapshot. Локально перевірено підключення.}
+
+\taskcard{C19}{Cloud/local storage}{3}{Абстрагувати attachments.}
+{AttachmentStorage обирає Azure Blob за connection string або local uploads.
+БД зберігає URL та metadata. Local path перевірено фактичним upload; Azure
+потребує storage account.}
+
+\taskcard{C21}{SSE-помічник}{5}{Потоково передавати прогрес і відповідь.}
+{Assistant повертає planning, tool, token, done і використовує tenant context.
+Smoke test отримав 200 та done=true; UI показав agent flow.}
+
+\taskcard{C22}{MCP server}{5}{Надати стандартні tools.}
+{Окремий stdio server підтримує initialize, discovery, tools/list і tools/call.
+Smoke tools/list повернув list\_documents, search\_documents, get\_document.}
+
+\subsection{BackEnd}
+\taskcard{B1}{Пагінація}{2}{Обмежити collection response.}
+{GET приймає skip/limit, повертає items, total і nextLink; limit 1--100.
+Smoke test: total=1, items=1; validation і nextLink покриті тестами.}
+
+\taskcard{B2}{Webhook/Telegram}{2}{Надсилати publish notification.}
+{WebhookNotificationService підтримує generic webhook і Telegram Bot API,
+не ламаючи CRUD при outage. Код збирається; доставка потребує token/chat id
+або test webhook.}
+
+\taskcard{B4}{Full-text search}{2}{Реалізувати релевантний пошук.}
+{DocumentSearchService будує tenant-scoped Lucene index і scored results для
+AJAX autocomplete. Smoke знайшов 1 результат; UI покрито E2E.}
+
+\taskcard{B5}{Ролі}{3}{Розділити Owner, Editor і Viewer.}
+{TenantAccessService перевіряє membership і minimum role. Viewer читає,
+Editor змінює контент, Owner керує простором, учасниками та планом.}
+
+\taskcard{B6}{Multi-tenancy і plans}{3}{Ізолювати команди й feature gates.}
+{UI/API/search/map/cache/SSE обмежені membership. Free: 2 MB; Premium: 10 MB,
+board, assistant, advanced insights. Unit/auth tests доводять правила.}
+
+\taskcard{B7}{Azure Functions}{3}{Створити serverless API.}
+{DigestFunctions має anonymous health і function-key digest. Проєкт збирається.
+func CLI відсутній, тому local host/cloud runtime потребує окремої перевірки.}
+
+\taskcard{B8}{RabbitMQ worker}{4}{Винести фонову обробку.}
+{Producer публікує durable messages, Worker має prefetch=1, ACK/reject і
+reconnect. Обидва проєкти збираються; broker runtime виконується окремо через
+Docker Compose.}
+
+\taskcard{B9}{API cache}{3}{Кешувати повторне читання.}
+{GET by id використовує IMemoryCache на 2 хвилини. Перший response має MISS,
+другий HIT; PUT/DELETE інвалідують entry. Smoke і integration test пройшли.}
+
+\subsection{FrontEnd}
+\taskcard{F1}{Chart.js}{3}{Візуалізувати статистику.}
+{Insights агрегує актуальні DB values й передає dataset у doughnut chart.
+Локально видно 1 workspace, 1 document, 3 blocks і published status.}
+
+\taskcard{F2}{jQuery autocomplete}{2}{Шукати без reload.}
+{Після 3 символів і 250 ms debounce викликається search API, попередній
+request скасовується, результати є links. Перевірено Playwright.}
+
+\taskcard{F3}{Drag-and-drop}{2}{Змінювати порядок блоків.}
+{Native drag events формують масив id; server транзакційно перевіряє блоки,
+оновлює Position і надсилає порядок SignalR.}
+
+\taskcard{F5}{React SPA}{3}{Створити окремий TypeScript-клієнт.}
+{React/Vite SPA має list, search, edit, loading/error/empty states. pnpm build
+успішно створив bundle: JS приблизно 223 kB (69.8 kB gzip), CSS 3.2 kB.}
+
+\taskcard{F6}{Pointer Events і Canvas}{5}{Підтримати mouse, pen і touch.}
+{Canvas слухає pointerdown/move/up, зберігає normalized coordinates, colour і
+width; resize не зміщує strokes, completed stroke передається hub.}
+
+\subsection{QA}
+\taskcard{QA1}{API integration tests}{2}{Автоматизувати REST lifecycle.}
+{DocumentsApiTests перевіряє list/create/read/update/delete, paging, validation,
+not found, conflict і cache. Усі integration tests пройшли.}
+
+\taskcard{QA2}{Browser E2E}{3}{Перевірити справжні user flows.}
+{Playwright покриває landing, Lucene autocomplete, block editor, map marker,
+robots.txt і sitemap.xml. Фінальний результат: 5/5 passed.}
+
+\taskcard{QA3}{Authorization tests}{3}{Довести tenant isolation.}
+{Дві test identities показують: owner бачить seed workspace, non-member не
+може list/open. FeatureGateTests покриває Free/Premium.}
+
+\section{REST API і ручна перевірка}
+\begin{longtable}{p{0.13\textwidth} p{0.39\textwidth} p{0.35\textwidth}}
+\toprule Method & URL & Результат \\
+\midrule\endfirsthead
+\toprule Method & URL & Результат \\
+\midrule\endhead
+GET & /api/documents & Paginated summaries \\
+GET & /api/documents/\{id\} & Detail + X-Cache \\
+POST & /api/documents & 201 Created + Location \\
+PUT & /api/documents/\{id\} & Update + invalidation \\
+DELETE & /api/documents/\{id\} & 204 No Content \\
+GET & /api/search/documents & Lucene results \\
+GET & /api/map/workspaces & Markers \\
+GET & /api/connectivity/state & Pulse \\
+GET & /api/connectivity/long-poll & Wait for version \\
+GET & /api/connectivity/websocket & WebSocket upgrade \\
+GET & /api/assistant/stream & SSE events \\
+\bottomrule\end{longtable}
+
+Ручний smoke test на живому сервері: collection total=1/items=1; два GET одного
+документа дали MISS, потім HIT; POST повернув 201; search повернув 1 result;
+DELETE повернув 204; Map повернув 1 marker; SSE повернув 200 і done=true.
+
+\begin{lstlisting}[language={},caption={Paginated response}]
+{"items":[...],"skip":0,"limit":20,"total":1,"nextLink":null}
+\end{lstlisting}
+
+\section{Безпека і конфігурація}
+Cookie authentication є базовою. Development switcher дає дві identity без
+секретів. Google OAuth активується лише з credentials. Identity зіставляється
+з WorkspaceMember; роль не приймається з browser request без перевірки.
+
+\begin{itemize}
+\item server-side validation доповнює client validation;
+\item anti-forgery захищає MVC state-changing forms;
+\item DTO запобігають mass assignment;
+\item tenant filters діють для UI, API, search, map, cache і SSE;
+\item upload має allowlist і plan-dependent limit;
+\item секрети не записані до Git;
+\item MCP stdout містить лише protocol messages.
+\end{itemize}
+
+\begin{table}[H]\centering\small
+\begin{tabularx}{\textwidth}{p{0.47\textwidth} X}
+\toprule Параметр & Призначення \\
+\midrule
+Authentication: Google ClientId / ClientSecret & Google OAuth \\
+Application Insights connection string & Azure telemetry \\
+Storage: BlobConnectionString & Azure Blob \\
+Notifications: Telegram token / ChatId & Telegram \\
+Notifications: WebhookUrl & Generic webhook \\
+RabbitMq: Host & Broker \\
+Assistant: Endpoint / ApiKey / Model & External AI \\
+\bottomrule\end{tabularx}\caption{Секретна зовнішня конфігурація}\end{table}
+
+\section{Тестування та результати перевірки}
+Перевірку виконано 26 жовтня 2026 року у Windows, .NET SDK 10.0.402,
+Node.js 24.22.1, pnpm 11.25.0. Сервер працював на
+\url{http://localhost:5036}; browser tests виконувалися у Chromium Playwright.
+
+Рівні: \textbf{6 unit}, \textbf{14 integration}, \textbf{5 E2E}; разом
+\textbf{25 автоматизованих тестів}, усі успішні.
+
+\begin{longtable}{>{\bfseries}p{0.30\textwidth} p{0.18\textwidth} p{0.39\textwidth}}
+\toprule Перевірка & Результат & Примітка \\
+\midrule\endfirsthead
+\toprule Перевірка & Результат & Примітка \\
+\midrule\endhead
+dotnet format & PASS & Без змін \\
+dotnet build & PASS & 0 warnings, 0 errors \\
+Unit tests & 6/6 PASS & Домен і gates \\
+Integration tests & 14/14 PASS & API та authorization \\
+React production build & PASS & TypeScript + Vite \\
+Playwright E2E & 5/5 PASS & Chromium \\
+API CRUD/paging/cache/search & PASS & 201, 204, MISS/HIT \\
+Map/SSE/MCP & PASS & marker, done, 3 tools \\
+File upload & PASS & Файл потім видалено \\
+\bottomrule\end{longtable}
+
+\begin{lstlisting}[language=bash,caption={Основні команди перевірки}]
+dotnet restore StudySpace.slnx
+dotnet format StudySpace.slnx --verify-no-changes --no-restore
+dotnet build StudySpace.slnx --no-restore
+dotnet test tests/StudySpace.UnitTests --no-build
+dotnet test tests/StudySpace.IntegrationTests --no-build
+cd src/studyspace-spa && pnpm build
+cd ../../tests/e2e && pnpm test
+\end{lstlisting}
+
+\subsection{MCP smoke test}
+\begin{lstlisting}[language={},caption={PowerShell tools/list}]
+'{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' |
+  dotnet run --project src/StudySpace.Mcp --no-build
+\end{lstlisting}
+Відповідь містила list\_documents, search\_documents і get\_document.
+
+\section{Запуск кожного застосунку}
+\subsection{Web}
+\begin{lstlisting}[language=bash]
+dotnet restore StudySpace.slnx
+dotnet run --project src/StudySpace.Web --urls http://localhost:5036
+\end{lstlisting}
+
+\subsection{React SPA}
+\begin{lstlisting}[language=bash]
+cd src/studyspace-spa
+pnpm install
+pnpm dev
+\end{lstlisting}
+API має працювати паралельно.
+
+\subsection{Container stack}
+\begin{lstlisting}[language=bash]
+docker compose up --build
+\end{lstlisting}
+Після інсталяції Docker: web використовує порт 8080, RabbitMQ використовує
+порт 5672, management UI використовує порт 15672.
+
+\subsection{Azure Functions}
+\begin{lstlisting}[language=bash]
+cd src/StudySpace.Functions
+func start
+\end{lstlisting}
+Потрібні Functions Core Tools і StudySpaceApiUrl.
+
+\subsection{MCP}
+\begin{lstlisting}[language=bash]
+dotnet run --project src/StudySpace.Mcp
+\end{lstlisting}
+Це не сайт: stdin/stdout підключаються до MCP-клієнта.
+
+\section{Автоматизація перевірок}
+GitHub Actions автоматично виконує форматування, збірку, .NET-тести,
+production-збірку frontend, Playwright E2E та Docker image build у чистому
+Ubuntu environment.
+
+\section{Висновки}
+Реалізовано StudySpace і 36 пунктів на 104 бали: один монорепозиторій,
+5 запускних застосунків і 10 технічних проєктів. Пов'язані MVC, API, data,
+auth, search, files і realtime-функції об'єднано, а React, Functions, Worker
+і MCP залишено окремими процесами.
+
+Перевірка підтвердила збірку без warnings/errors, 25 тестів, React bundle, CRUD,
+pagination, cache MISS/HIT, Lucene, map, SSE і MCP tools/list. Роботу
+зафіксовано 12 актуальними скріншотами. Рішення має завершену структуру та
+може бути розгорнуте у зовнішньому середовищі після налаштування відповідних
+сервісів.
+\end{document}
